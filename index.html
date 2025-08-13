@@ -48,6 +48,18 @@
                 margin-left: 70px;
             }
         }
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -120,6 +132,9 @@
 
         <!-- Main Content -->
         <div class="main-content flex-1 overflow-auto ml-64">
+             <div id="loadingOverlay" class="loading-overlay">
+                <i class="fas fa-spinner fa-spin text-4xl text-blue-600"></i>
+            </div>
             <!-- Top Navigation -->
             <header class="bg-white shadow-sm">
                 <div class="px-4 py-3 flex justify-between items-center">
@@ -1259,7 +1274,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Departamento*</label>
-                        <select id="positionDepartment" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <select id="positionDepartment" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">Selecione um departamento</option>
                         </select>
                     </div>
@@ -1378,7 +1393,6 @@
         let employees = [];
         let departments = [];
         let positions = [];
-        let payrollData = [];
         let payrollCalculated = {};
 
         // UI Elements
@@ -1388,6 +1402,7 @@
         const navItems = document.querySelectorAll('.nav-item');
         const sectionContents = document.querySelectorAll('.section-content');
         const pageTitle = document.getElementById('pageTitle');
+        const loadingOverlay = document.getElementById('loadingOverlay');
 
         // Modals
         const addEmployeeModal = document.getElementById('addEmployeeModal');
@@ -1564,12 +1579,15 @@
                     editEmployeeFileContainer.appendChild(fileElement);
                 });
                 document.querySelectorAll('.delete-file-btn[data-container="edit"]').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
+                    btn.addEventListener('click', async (e) => {
                         const filename = e.currentTarget.dataset.filename;
                         const employeeId = document.getElementById('editEmployeeId').value;
-                        const employee = employees.find(emp => emp.id === parseInt(employeeId));
+                        const employee = employees.find(emp => emp.id === employeeId);
                         if (employee) {
                             employee.documents = employee.documents.filter(doc => doc !== filename);
+                            // Update Firestore
+                            const employeeDocRef = doc(db, `artifacts/${appId}/users/${userId}/employees/${employeeId}`);
+                            await setDoc(employeeDocRef, { documents: employee.documents }, { merge: true });
                             renderEditFileContainer(employee.documents);
                         }
                     });
@@ -1688,6 +1706,7 @@
         });
 
         function updateDashboardCounts() {
+            // Apenas atualiza o UI com os dados globais que já foram populados pelo onSnapshot
             dashboardData.totalEmployees = employees.length;
             dashboardData.totalDepartments = departments.length;
             dashboardData.newHires = employees.filter(emp => new Date(emp.hireDate) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length;
@@ -1699,6 +1718,40 @@
             document.getElementById('totalDepartments').textContent = dashboardData.totalDepartments;
             document.getElementById('totalPayroll').textContent = dashboardData.totalPayroll.toFixed(2);
             document.getElementById('newHires').textContent = dashboardData.newHires;
+        }
+
+        function calculatePayroll() {
+            let totalGross = 0;
+            let totalDeductions = 0;
+            let totalBonus = 0;
+            const payrollList = employees.map(emp => {
+                const baseSalary = emp.salary;
+                const bonus = baseSalary * 0.1; // Simulated 10% bonus
+                const deductions = baseSalary * 0.2; // Simulated 20% deductions (taxes, benefits, etc.)
+                const netSalary = baseSalary + bonus - deductions;
+
+                totalGross += baseSalary;
+                totalBonus += bonus;
+                totalDeductions += deductions;
+
+                return {
+                    id: emp.id,
+                    name: emp.name,
+                    position: emp.position,
+                    baseSalary: baseSalary,
+                    bonus: bonus,
+                    deductions: deductions,
+                    netSalary: netSalary,
+                    status: 'Processado'
+                };
+            });
+            return {
+                list: payrollList,
+                gross: totalGross,
+                bonus: totalBonus,
+                deductions: totalDeductions,
+                net: totalGross + totalBonus - totalDeductions
+            };
         }
 
         function updateDepartmentAndPositionCounts() {
@@ -1989,22 +2042,23 @@
                             display: false,
                         }
                     }
-                });
+                }
+            });
 
-                // Payroll Trend Chart
-                new Chart(document.getElementById('payrollTrendChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: payrollMonths,
-                        datasets: [{
-                            label: 'Total da Folha de Pagamento',
-                            data: payrollTrendData,
-                            backgroundColor: '#10B981',
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
+            // Payroll Trend Chart
+            new Chart(document.getElementById('payrollTrendChart'), {
+                type: 'bar',
+                data: {
+                    labels: payrollMonths,
+                    datasets: [{
+                        label: 'Total da Folha de Pagamento',
+                        data: payrollTrendData,
+                        backgroundColor: '#10B981',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                         scales: {
                             y: {
                                 beginAtZero: true
@@ -2037,12 +2091,15 @@
                         editEmployeeFileContainer.appendChild(fileElement);
                     });
                     document.querySelectorAll('.delete-file-btn[data-container="edit"]').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
+                        btn.addEventListener('click', async (e) => {
                             const filename = e.currentTarget.dataset.filename;
                             const employeeId = document.getElementById('editEmployeeId').value;
-                            const employee = employees.find(emp => emp.id === parseInt(employeeId));
+                            const employee = employees.find(emp => emp.id === employeeId);
                             if (employee) {
                                 employee.documents = employee.documents.filter(doc => doc !== filename);
+                                // Update Firestore
+                                const employeeDocRef = doc(db, `artifacts/${appId}/users/${userId}/employees/${employeeId}`);
+                                await setDoc(employeeDocRef, { documents: employee.documents }, { merge: true });
                                 renderEditFileContainer(employee.documents);
                             }
                         });
@@ -2051,7 +2108,7 @@
             }
             
             function fillEditForm(id) {
-                const employee = employees.find(emp => emp.id === parseInt(id));
+                const employee = employees.find(emp => emp.id === id);
                 if (employee) {
                     document.getElementById('editEmployeeId').value = employee.id;
                     document.getElementById('editEmployeeName').value = employee.name;
@@ -2120,7 +2177,7 @@
             function attachEmployeeListeners() {
                 document.querySelectorAll('.view-employee').forEach(btn => {
                     btn.addEventListener('click', (e) => {
-                        const id = parseInt(e.target.dataset.id);
+                        const id = e.target.dataset.id;
                         const employee = employees.find(emp => emp.id === id);
                         if (employee) {
                             document.getElementById('viewEmployeeName').textContent = employee.name;
@@ -2153,9 +2210,7 @@
                             // Renderiza os documentos na visualização
                             const viewDocumentsContainer = document.getElementById('viewEmployeeDocuments');
                             viewDocumentsContainer.innerHTML = '';
-                            if (employee.documents.length === 0) {
-                                viewDocumentsContainer.innerHTML = `<p class="text-gray-400">Nenhum documento anexado.</p>`;
-                            } else {
+                            if (employee.documents && employee.documents.length > 0) {
                                 employee.documents.forEach(doc => {
                                     const fileIcon = doc.endsWith('.pdf') ? 'fas fa-file-pdf text-red-500' :
                                                      doc.endsWith('.jpg') || doc.endsWith('.png') ? 'fas fa-image text-blue-500' :
@@ -2168,6 +2223,8 @@
                                     `;
                                     viewDocumentsContainer.appendChild(fileElement);
                                 });
+                            } else {
+                                viewDocumentsContainer.innerHTML = `<p class="text-gray-400">Nenhum documento anexado.</p>`;
                             }
 
                             showModal(viewEmployeeModal);
@@ -2184,19 +2241,21 @@
                 });
                 
                 document.querySelectorAll('.delete-employee').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const id = parseInt(e.target.dataset.id);
-                        // A simple confirmation dialog.
+                    btn.addEventListener('click', async (e) => {
+                        const id = e.target.dataset.id;
                         if (window.confirm('Tem certeza que deseja excluir este funcionário?')) {
-                            employees = employees.filter(emp => emp.id !== id);
-                            updateDashboardCounts();
-                            renderTables();
+                            try {
+                                const employeeDocRef = doc(db, `artifacts/${appId}/users/${userId}/employees/${id}`);
+                                await deleteDoc(employeeDocRef);
+                            } catch (error) {
+                                console.error("Error deleting employee: ", error);
+                            }
                         }
                     });
                 });
             }
             
-            function renderTables() {
+            function renderAll() {
                 updateDepartmentAndPositionCounts();
                 renderEmployeesTable(employees);
                 renderDepartmentsTable(departments);
@@ -2204,10 +2263,117 @@
                 const payroll = calculatePayroll();
                 renderPayrollTable(payroll.list);
                 updateSelectOptions();
+                updateDashboardCounts();
+                renderDashboardCharts();
             }
 
-            renderDashboard();
-            renderTables();
+            function renderDashboardCharts() {
+                 // Hires vs Terminations Chart
+                new Chart(document.getElementById('hiresTerminationsChart'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                        datasets: [{
+                            label: 'Contratações',
+                            data: [10, 12, 8, 15, 11, 14],
+                            borderColor: '#4F46E5',
+                            backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                            tension: 0.1
+                        }, {
+                            label: 'Desligamentos',
+                            data: [5, 3, 6, 4, 7, 5],
+                            borderColor: '#DC2626',
+                            backgroundColor: 'rgba(220, 38, 38, 0.2)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+                
+                // Gender Distribution Chart
+                new Chart(document.getElementById('genderChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(employees.reduce((acc, emp) => { acc[emp.gender] = (acc[emp.gender] || 0) + 1; return acc; }, {})),
+                        datasets: [{
+                            data: Object.values(employees.reduce((acc, emp) => { acc[emp.gender] = (acc[emp.gender] || 0) + 1; return acc; }, {})),
+                            backgroundColor: ['#4F46E5', '#EC4899', '#6B7280'],
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' }, title: { display: false } } }
+                });
+
+                // Payroll Trend Chart
+                new Chart(document.getElementById('payrollTrendChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                        datasets: [{
+                            label: 'Total da Folha de Pagamento',
+                            data: [250000, 260000, 275000, 270000, 280000, 290000, 285000, 295000, 300000, 310000, 305000, 315000],
+                            backgroundColor: '#10B981',
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+                });
+            }
+            
+            async function fetchInitialData() {
+                loadingOverlay.classList.remove('hidden');
+
+                return new Promise((resolve, reject) => {
+                    let loadedCount = 0;
+                    const expectedCount = 3;
+
+                    const checkAndResolve = () => {
+                        if (loadedCount === expectedCount) {
+                            renderAll();
+                            loadingOverlay.classList.add('hidden');
+                            resolve();
+                        }
+                    };
+
+                    onSnapshot(collection(db, `artifacts/${appId}/users/${userId}/employees`), (snapshot) => {
+                        employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        renderEmployeesTable(employees);
+                        loadedCount++;
+                        checkAndResolve();
+                    }, reject);
+
+                    onSnapshot(collection(db, `artifacts/${appId}/users/${userId}/departments`), (snapshot) => {
+                        departments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        renderDepartmentsTable(departments);
+                        loadedCount++;
+                        checkAndResolve();
+                    }, reject);
+
+                    onSnapshot(collection(db, `artifacts/${appId}/users/${userId}/positions`), (snapshot) => {
+                        positions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        renderPositionsTable(positions);
+                        loadedCount++;
+                        checkAndResolve();
+                    }, reject);
+                });
+            }
+            
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    await fetchInitialData();
+                } else {
+                    if (initialAuthToken) {
+                        try {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        } catch (error) {
+                            console.error("Error signing in with custom token: ", error);
+                            await signInAnonymously(auth);
+                        }
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                }
+            });
         });
     </script>
 </body>
