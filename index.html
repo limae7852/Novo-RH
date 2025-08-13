@@ -939,7 +939,7 @@
                                         <option value="CE">Ceará</option>
                                         <option value="DF">Distrito Federal</option>
                                         <option value="ES">Espírito Santo</option>
-                                        <option value="GO">Goiás</option>
+                                        <option value="GO">Goiás</s
                                         <option value="MA">Maranhão</option>
                                         <option value="MT">Mato Grosso</option>
                                         <option value="MS">Mato Grosso do Sul</option>
@@ -1123,7 +1123,7 @@
                                         <option value="CE">Ceará</option>
                                         <option value="DF">Distrito Federal</option>
                                         <option value="ES">Espírito Santo</option>
-                                        <option value="GO">Goiás</option>
+                                        <option value="GO">Goiás</s
                                         <option value="MA">Maranhão</option>
                                         <option value="MT">Mato Grosso</option>
                                         <option value="MS">Mato Grosso do Sul</option>
@@ -1394,6 +1394,8 @@
         let departments = [];
         let positions = [];
         let payrollCalculated = {};
+        
+        let departmentChart, positionChart, hiresTerminationsChart, genderChart, payrollDeptChart, payrollTrendChart;
 
         // UI Elements
         const sidebar = document.querySelector('.sidebar');
@@ -1707,12 +1709,12 @@
 
         function updateDashboardCounts() {
             // Apenas atualiza o UI com os dados globais que já foram populados pelo onSnapshot
-            dashboardData.totalEmployees = employees.length;
-            dashboardData.totalDepartments = departments.length;
-            dashboardData.newHires = employees.filter(emp => new Date(emp.hireDate) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length;
-            
-            const payroll = calculatePayroll();
-            dashboardData.totalPayroll = payroll.net;
+            const dashboardData = {
+                totalEmployees: employees.length,
+                totalDepartments: departments.length,
+                newHires: employees.filter(emp => new Date(emp.hireDate) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length,
+                totalPayroll: calculatePayroll().net
+            };
 
             document.getElementById('totalEmployees').textContent = dashboardData.totalEmployees;
             document.getElementById('totalDepartments').textContent = dashboardData.totalDepartments;
@@ -1789,12 +1791,24 @@
                 recentHiresTable.innerHTML += row;
             });
 
-            // Department distribution chart
-            const deptLabels = departments.map(d => d.name);
-            const deptData = departments.map(d => d.employees);
-            const deptColors = ['#4F46E5', '#10B981', '#F59E0B', '#6366F1', '#34D399'];
+            renderDashboardCharts();
+        }
+        
+        function renderDashboardCharts() {
+             // Destroy existing charts to prevent issues on re-render
+            if (departmentChart) departmentChart.destroy();
+            if (positionChart) positionChart.destroy();
+            if (hiresTerminationsChart) hiresTerminationsChart.destroy();
+            if (genderChart) genderChart.destroy();
+            if (payrollDeptChart) payrollDeptChart.destroy();
+            if (payrollTrendChart) payrollTrendChart.destroy();
+
+             // Department distribution chart
+             const deptLabels = departments.map(d => d.name);
+             const deptData = departments.map(d => employees.filter(e => e.department === d.name).length);
+             const deptColors = ['#4F46E5', '#10B981', '#F59E0B', '#6366F1', '#34D399'];
             
-            new Chart(document.getElementById('departmentChart'), {
+            departmentChart = new Chart(document.getElementById('departmentChart'), {
                 type: 'doughnut',
                 data: {
                     labels: deptLabels,
@@ -1820,9 +1834,9 @@
 
             // Position distribution chart
             const positionLabels = positions.map(p => p.name);
-            const positionData = positions.map(p => p.employees);
+            const positionData = positions.map(p => employees.filter(e => e.position === p.name).length);
             
-            new Chart(document.getElementById('positionChart'), {
+            positionChart = new Chart(document.getElementById('positionChart'), {
                 type: 'bar',
                 data: {
                     labels: positionLabels,
@@ -1846,6 +1860,56 @@
                         }
                     }
                 }
+            });
+
+            // Hires vs Terminations Chart (static mock data)
+            hiresTerminationsChart = new Chart(document.getElementById('hiresTerminationsChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                    datasets: [{
+                        label: 'Contratações',
+                        data: [10, 12, 8, 15, 11, 14],
+                        borderColor: '#4F46E5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                        tension: 0.1
+                    }, {
+                        label: 'Desligamentos',
+                        data: [5, 3, 6, 4, 7, 5],
+                        borderColor: '#DC2626',
+                        backgroundColor: 'rgba(220, 38, 38, 0.2)',
+                        tension: 0.1
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+            
+            // Gender Distribution Chart
+            genderChart = new Chart(document.getElementById('genderChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(employees.reduce((acc, emp) => { acc[emp.gender] = (acc[emp.gender] || 0) + 1; return acc; }, {})),
+                    datasets: [{
+                        data: Object.values(employees.reduce((acc, emp) => { acc[emp.gender] = (acc[emp.gender] || 0) + 1; return acc; }, {})),
+                        backgroundColor: ['#4F46E5', '#EC4899', '#6B7280'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' }, title: { display: false } } }
+            });
+
+            // Payroll Trend Chart (static mock data)
+            payrollTrendChart = new Chart(document.getElementById('payrollTrendChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                    datasets: [{
+                        label: 'Total da Folha de Pagamento',
+                        data: [250000, 260000, 275000, 270000, 280000, 290000, 285000, 295000, 300000, 310000, 305000, 315000],
+                        backgroundColor: '#10B981',
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
             });
         }
 
@@ -1949,7 +2013,8 @@
             document.getElementById('payrollDeductions').textContent = payroll.deductions.toFixed(2);
             document.getElementById('payrollNet').textContent = payroll.net.toFixed(2);
 
-            new Chart(document.getElementById('payrollDeptChart'), {
+            if (payrollDeptChart) payrollDeptChart.destroy();
+            payrollDeptChart = new Chart(document.getElementById('payrollDeptChart'), {
                 type: 'doughnut',
                 data: {
                     labels: departments.map(d => d.name),
@@ -1978,6 +2043,11 @@
         }
 
         function renderReports() {
+             // Destroy existing charts to prevent issues on re-render
+            if (hiresTerminationsChart) hiresTerminationsChart.destroy();
+            if (genderChart) genderChart.destroy();
+            if (payrollTrendChart) payrollTrendChart.destroy();
+
              // Simulated data for charts
             const hiresData = [10, 12, 8, 15, 11, 14];
             const terminationsData = [5, 3, 6, 4, 7, 5];
@@ -1996,7 +2066,7 @@
 
 
             // Hires vs Terminations Chart
-            new Chart(document.getElementById('hiresTerminationsChart'), {
+            hiresTerminationsChart = new Chart(document.getElementById('hiresTerminationsChart'), {
                 type: 'line',
                 data: {
                     labels: months,
@@ -2021,7 +2091,7 @@
             });
             
             // Gender Distribution Chart
-            new Chart(document.getElementById('genderChart'), {
+            genderChart = new Chart(document.getElementById('genderChart'), {
                 type: 'pie',
                 data: {
                     labels: Object.keys(genderData),
@@ -2046,7 +2116,7 @@
             });
 
             // Payroll Trend Chart
-            new Chart(document.getElementById('payrollTrendChart'), {
+            payrollTrendChart = new Chart(document.getElementById('payrollTrendChart'), {
                 type: 'bar',
                 data: {
                     labels: payrollMonths,
@@ -2268,8 +2338,75 @@
             }
 
             function renderDashboardCharts() {
-                 // Hires vs Terminations Chart
-                new Chart(document.getElementById('hiresTerminationsChart'), {
+                 // Destroy existing charts to prevent issues on re-render
+                if (departmentChart) departmentChart.destroy();
+                if (positionChart) positionChart.destroy();
+                if (hiresTerminationsChart) hiresTerminationsChart.destroy();
+                if (genderChart) genderChart.destroy();
+                if (payrollDeptChart) payrollDeptChart.destroy();
+                if (payrollTrendChart) payrollTrendChart.destroy();
+
+                 // Department distribution chart
+                 const deptLabels = departments.map(d => d.name);
+                 const deptData = departments.map(d => employees.filter(e => e.department === d.name).length);
+                 const deptColors = ['#4F46E5', '#10B981', '#F59E0B', '#6366F1', '#34D399'];
+                
+                departmentChart = new Chart(document.getElementById('departmentChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: deptLabels,
+                        datasets: [{
+                            data: deptData,
+                            backgroundColor: deptColors,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            },
+                            title: {
+                                display: false,
+                            }
+                        }
+                    }
+                });
+
+                // Position distribution chart
+                const positionLabels = positions.map(p => p.name);
+                const positionData = positions.map(p => employees.filter(e => e.position === p.name).length);
+                
+                positionChart = new Chart(document.getElementById('positionChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: positionLabels,
+                        datasets: [{
+                            label: 'Número de Funcionários',
+                            data: positionData,
+                            backgroundColor: '#4F46E5',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false,
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+                // Hires vs Terminations Chart (static mock data)
+                hiresTerminationsChart = new Chart(document.getElementById('hiresTerminationsChart'), {
                     type: 'line',
                     data: {
                         labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
@@ -2291,7 +2428,7 @@
                 });
                 
                 // Gender Distribution Chart
-                new Chart(document.getElementById('genderChart'), {
+                genderChart = new Chart(document.getElementById('genderChart'), {
                     type: 'pie',
                     data: {
                         labels: Object.keys(employees.reduce((acc, emp) => { acc[emp.gender] = (acc[emp.gender] || 0) + 1; return acc; }, {})),
@@ -2305,7 +2442,7 @@
                 });
 
                 // Payroll Trend Chart
-                new Chart(document.getElementById('payrollTrendChart'), {
+                payrollTrendChart = new Chart(document.getElementById('payrollTrendChart'), {
                     type: 'bar',
                     data: {
                         labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
