@@ -1355,855 +1355,638 @@
         </div>
     </div>
     
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Mock data
-            let employees = [{
-                id: 1,
-                name: 'João Silva',
-                position: 'Analista de RH',
-                department: 'Recursos Humanos',
-                hireDate: '2022-03-15',
-                salary: 5000,
-                status: 'Ativo',
-                email: 'joao.silva@empresa.com',
-                phone: '11 98765-4321',
-                address: 'Rua A, 100',
-                city: 'São Paulo',
-                state: 'SP',
-                cpf: '123.456.789-00',
-                rg: '12.345.678-9',
-                birthDate: '1990-05-20',
-                gender: 'Masculino',
-                maritalStatus: 'Casado(a)',
-                contractType: 'CLT',
-                documents: ['contrato-joao.pdf', 'identidade-joao.pdf']
-            }, {
-                id: 2,
-                name: 'Maria Oliveira',
-                position: 'Desenvolvedora Sênior',
-                department: 'Tecnologia',
-                hireDate: '2020-08-01',
-                salary: 12000,
-                status: 'Ativo',
-                email: 'maria.oliveira@empresa.com',
-                phone: '21 99876-5432',
-                address: 'Av. B, 250',
-                city: 'Rio de Janeiro',
-                state: 'RJ',
-                cpf: '987.654.321-00',
-                rg: '98.765.432-1',
-                birthDate: '1985-11-10',
-                gender: 'Feminino',
-                maritalStatus: 'Solteiro(a)',
-                contractType: 'CLT',
-                documents: ['contrato-maria.pdf']
-            }, {
-                id: 3,
-                name: 'Carlos Santos',
-                position: 'Gerente de Vendas',
-                department: 'Vendas',
-                hireDate: '2019-01-10',
-                salary: 15000,
-                status: 'Ativo',
-                email: 'carlos.santos@empresa.com',
-                phone: '31 97654-3210',
-                address: 'Rua C, 300',
-                city: 'Belo Horizonte',
-                state: 'MG',
-                cpf: '456.123.789-00',
-                rg: '45.612.378-9',
-                birthDate: '1982-03-25',
-                gender: 'Masculino',
-                maritalStatus: 'Casado(a)',
-                contractType: 'CLT',
-                documents: []
-            }, {
-                id: 4,
-                name: 'Ana Pereira',
-                position: 'Estagiária de Marketing',
-                department: 'Marketing',
-                hireDate: '2023-06-20',
-                salary: 1800,
-                status: 'Férias',
-                email: 'ana.pereira@empresa.com',
-                phone: '11 91234-5678',
-                address: 'Rua D, 450',
-                city: 'São Paulo',
-                state: 'SP',
-                cpf: '789.012.345-00',
-                rg: '78.901.234-5',
-                birthDate: '2000-08-12',
-                gender: 'Feminino',
-                maritalStatus: 'Solteiro(a)',
-                contractType: 'Estágio',
-                documents: []
-            }, {
-                id: 5,
-                name: 'Pedro Costa',
-                position: 'Analista Financeiro',
-                department: 'Finanças',
-                hireDate: '2021-05-05',
-                salary: 7500,
-                status: 'Ativo',
-                email: 'pedro.costa@empresa.com',
-                phone: '41 96543-2109',
-                address: 'Rua E, 550',
-                city: 'Curitiba',
-                state: 'PR',
-                cpf: '321.654.987-00',
-                rg: '32.165.498-7',
-                birthDate: '1992-09-30',
-                gender: 'Masculino',
-                maritalStatus: 'Divorciado(a)',
-                contractType: 'CLT',
-                documents: []
-            }, {
-                id: 6,
-                name: 'Fernanda Lima',
-                position: 'Engenheira de Software',
-                department: 'Tecnologia',
-                hireDate: '2023-01-10',
-                salary: 9500,
-                status: 'Ativo',
-                email: 'fernanda.lima@empresa.com',
-                phone: '51 91234-5678',
-                address: 'Rua F, 600',
-                city: 'Porto Alegre',
-                state: 'RS',
-                cpf: '654.321.987-00',
-                rg: '65.432.198-7',
-                birthDate: '1995-02-18',
-                gender: 'Feminino',
-                maritalStatus: 'Solteiro(a)',
-                contractType: 'CLT',
-                documents: []
-            }];
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-            let departments = [{
-                id: 1,
-                name: 'Recursos Humanos',
-                manager: 'João Silva',
-                employees: 0,
-                budget: 250000
-            }, {
-                id: 2,
-                name: 'Tecnologia',
-                manager: 'Maria Oliveira',
-                employees: 0,
-                budget: 800000
-            }, {
-                id: 3,
-                name: 'Vendas',
-                manager: 'Carlos Santos',
-                employees: 0,
-                budget: 600000
-            }, {
-                id: 4,
-                name: 'Marketing',
-                manager: null,
-                employees: 0,
-                budget: 450000
-            }, {
-                id: 5,
-                name: 'Finanças',
-                manager: 'Pedro Costa',
-                employees: 0,
-                budget: 300000
-            }];
+        // Firebase Auth guardrail check and initialization
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
 
-            let positions = [{
-                id: 1,
-                name: 'Analista de RH',
-                department: 'Recursos Humanos',
-                baseSalary: 5000,
-                employees: 0,
-                description: 'Responsável por processos de recrutamento e seleção.'
-            }, {
-                id: 2,
-                name: 'Desenvolvedora Sênior',
-                department: 'Tecnologia',
-                baseSalary: 12000,
-                employees: 0,
-                description: 'Desenvolve e mantém sistemas de software complexos.'
-            }, {
-                id: 3,
-                name: 'Gerente de Vendas',
-                department: 'Vendas',
-                baseSalary: 15000,
-                employees: 0,
-                description: 'Lidera a equipe de vendas e define estratégias comerciais.'
-            }, {
-                id: 4,
-                name: 'Estagiária de Marketing',
-                department: 'Marketing',
-                baseSalary: 1800,
-                employees: 0,
-                description: 'Auxilia na criação de campanhas de marketing digital e conteúdo.'
-            }, {
-                id: 5,
-                name: 'Analista Financeiro',
-                department: 'Finanças',
-                baseSalary: 7500,
-                employees: 0,
-                description: 'Analisa dados financeiros e prepara relatórios de desempenho.'
-            }, {
-                id: 6,
-                name: 'Engenheira de Software',
-                department: 'Tecnologia',
-                baseSalary: 9500,
-                employees: 0,
-                description: 'Projeta, implementa e testa componentes de software.'
-            }];
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        let userId = null;
+        let employees = [];
+        let departments = [];
+        let positions = [];
+        let payrollData = [];
+        let payrollCalculated = {};
 
-            let currentEmployeeId = employees.length + 1;
-            let currentDepartmentId = departments.length + 1;
-            let currentPositionId = positions.length + 1;
+        // UI Elements
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+        const toggleSidebarBtn = document.getElementById('toggleSidebar');
+        const navItems = document.querySelectorAll('.nav-item');
+        const sectionContents = document.querySelectorAll('.section-content');
+        const pageTitle = document.getElementById('pageTitle');
 
-            // Dashboard data (simulated)
-            const dashboardData = {
-                totalEmployees: employees.length,
-                totalDepartments: departments.length,
-                totalPayroll: 0,
-                newHires: 2
+        // Modals
+        const addEmployeeModal = document.getElementById('addEmployeeModal');
+        const addEmployeeBtn = document.getElementById('addEmployeeBtn');
+        const cancelEmployeeBtn = document.getElementById('cancelEmployeeBtn');
+        const employeeForm = document.getElementById('employeeForm');
+        const employeeFileUploadBtn = document.getElementById('employeeFileUploadBtn');
+        const employeeFile = document.getElementById('employeeFile');
+        const employeeFileContainer = document.getElementById('employeeFileContainer');
+
+        const editEmployeeModal = document.getElementById('editEmployeeModal');
+        const cancelEditEmployeeBtn = document.getElementById('cancelEditEmployeeBtn');
+        const editEmployeeForm = document.getElementById('editEmployeeForm');
+        const editEmployeeFileUploadBtn = document.getElementById('editEmployeeFileUploadBtn');
+        const editEmployeeFile = document.getElementById('editEmployeeFile');
+        const editEmployeeFileContainer = document.getElementById('editEmployeeFileContainer');
+
+        const addDepartmentModal = document.getElementById('addDepartmentModal');
+        const addDepartmentBtn = document.getElementById('addDepartmentBtn');
+        const cancelDepartmentBtn = document.getElementById('cancelDepartmentBtn');
+        const departmentForm = document.getElementById('departmentForm');
+
+        const addPositionModal = document.getElementById('addPositionModal');
+        const addPositionBtn = document.getElementById('addPositionBtn');
+        const cancelPositionBtn = document.getElementById('cancelPositionBtn');
+        const positionForm = document.getElementById('positionForm');
+
+        const viewEmployeeModal = document.getElementById('viewEmployeeModal');
+        const closeViewEmployeeBtn = document.getElementById('closeEmployeeBtn');
+        const editEmployeeViewBtn = document.getElementById('editEmployeeViewBtn');
+
+        // Tab functionality for Settings
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('border-b-2', 'border-blue-600', 'text-blue-600', 'hover:text-blue-600'));
+                tabBtns.forEach(b => b.classList.add('text-gray-500', 'hover:text-blue-600'));
+                btn.classList.add('border-b-2', 'border-blue-600', 'text-blue-600');
+                
+                tabContents.forEach(content => content.classList.add('hidden'));
+                document.getElementById(`${btn.dataset.tab}Tab`).classList.remove('hidden');
+            });
+        });
+
+        // Event Listeners
+        toggleSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('ml-64');
+        });
+
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                navItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                sectionContents.forEach(section => section.classList.add('hidden'));
+                const targetSection = document.getElementById(`${item.dataset.section}Section`);
+                if (targetSection) {
+                    targetSection.classList.remove('hidden');
+                    pageTitle.textContent = item.querySelector('.sidebar-text').textContent;
+                    if (item.dataset.section === 'dashboard') {
+                        renderDashboard();
+                    } else if (item.dataset.section === 'reports') {
+                        renderReports();
+                    } else if (item.dataset.section === 'employees') {
+                        renderEmployeesTable(employees);
+                    }
+                }
+            });
+        });
+
+        addEmployeeBtn.addEventListener('click', () => {
+            employeeFileContainer.innerHTML = '';
+            showModal(addEmployeeModal);
+            updateSelectOptions();
+        });
+        cancelEmployeeBtn.addEventListener('click', () => hideModal(addEmployeeModal));
+        
+        editEmployeeViewBtn.addEventListener('click', () => {
+            const id = document.getElementById('editEmployeeViewBtn').dataset.id;
+            fillEditForm(id);
+            hideModal(viewEmployeeModal);
+            showModal(editEmployeeModal);
+        });
+        
+        cancelEditEmployeeBtn.addEventListener('click', () => hideModal(editEmployeeModal));
+        
+        closeViewEmployeeBtn.addEventListener('click', () => hideModal(viewEmployeeModal));
+
+        addDepartmentBtn.addEventListener('click', () => showModal(addDepartmentModal));
+        cancelDepartmentBtn.addEventListener('click', () => hideModal(addDepartmentModal));
+
+        addPositionBtn.addEventListener('click', () => showModal(addPositionModal));
+        cancelPositionBtn.addEventListener('click', () => hideModal(addPositionModal));
+        
+        employeeFileUploadBtn.addEventListener('click', () => {
+            employeeFile.click();
+        });
+
+        employeeFile.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                renderAddFileContainer(file.name);
+            });
+        });
+
+        editEmployeeFileUploadBtn.addEventListener('click', () => {
+            editEmployeeFile.click();
+        });
+        
+        editEmployeeFile.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            const employeeId = document.getElementById('editEmployeeId').value;
+            const employee = employees.find(emp => emp.id === parseInt(employeeId));
+            if (employee) {
+                files.forEach(file => {
+                    if (!employee.documents.includes(file.name)) {
+                        employee.documents.push(file.name);
+                    }
+                });
+                renderEditFileContainer(employee.documents);
+            }
+        });
+
+        async function showModal(modal) {
+            modal.classList.remove('hidden');
+        }
+
+        function hideModal(modal) {
+            modal.classList.add('hidden');
+        }
+        
+        function renderAddFileContainer(filename) {
+             const fileIcon = filename.endsWith('.pdf') ? 'fas fa-file-pdf text-red-500' :
+                                     filename.endsWith('.jpg') || filename.endsWith('.png') ? 'fas fa-image text-blue-500' :
+                                     'fas fa-file text-gray-500';
+            const fileElement = document.createElement('div');
+            fileElement.className = 'border rounded p-3 flex items-center';
+            fileElement.innerHTML = `
+                <i class="${fileIcon} text-xl mr-3"></i>
+                <div>
+                    <p class="text-sm font-medium">${filename}</p>
+                </div>
+                <button type="button" class="ml-auto text-red-500 hover:text-red-700 delete-file-btn" data-filename="${filename}" data-container="add">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            employeeFileContainer.appendChild(fileElement);
+        }
+
+        function renderEditFileContainer(documents) {
+            editEmployeeFileContainer.innerHTML = '';
+            if (documents.length === 0) {
+                editEmployeeFileContainer.innerHTML = `<p class="text-gray-400">Nenhum documento anexado.</p>`;
+            } else {
+                documents.forEach(doc => {
+                    const fileIcon = doc.endsWith('.pdf') ? 'fas fa-file-pdf text-red-500' :
+                                     doc.endsWith('.jpg') || doc.endsWith('.png') ? 'fas fa-image text-blue-500' :
+                                     'fas fa-file text-gray-500';
+                    const fileElement = document.createElement('div');
+                    fileElement.className = 'border rounded p-3 flex items-center';
+                    fileElement.innerHTML = `
+                        <i class="${fileIcon} text-xl mr-3"></i>
+                        <div>
+                            <p class="text-sm font-medium">${doc}</p>
+                        </div>
+                        <button type="button" class="ml-auto text-red-500 hover:text-red-700 delete-file-btn" data-filename="${doc}" data-container="edit">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    editEmployeeFileContainer.appendChild(fileElement);
+                });
+                document.querySelectorAll('.delete-file-btn[data-container="edit"]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const filename = e.currentTarget.dataset.filename;
+                        const employeeId = document.getElementById('editEmployeeId').value;
+                        const employee = employees.find(emp => emp.id === parseInt(employeeId));
+                        if (employee) {
+                            employee.documents = employee.documents.filter(doc => doc !== filename);
+                            renderEditFileContainer(employee.documents);
+                        }
+                    });
+                });
+            }
+        }
+
+        employeeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newEmployee = {
+                name: document.getElementById('employeeName').value,
+                position: document.getElementById('employeePosition').value,
+                department: document.getElementById('employeeDepartment').value,
+                hireDate: document.getElementById('employeeHireDate').value,
+                salary: parseFloat(document.getElementById('employeeSalary').value),
+                status: document.getElementById('employeeStatus').value,
+                email: document.getElementById('employeeEmail').value,
+                phone: document.getElementById('employeePhone').value,
+                address: document.getElementById('employeeAddress').value,
+                city: document.getElementById('employeeCity').value,
+                state: document.getElementById('employeeState').value,
+                cpf: document.getElementById('employeeCpf').value,
+                rg: document.getElementById('employeeRg').value,
+                birthDate: document.getElementById('employeeBirthDate').value,
+                gender: document.getElementById('employeeGender').value,
+                maritalStatus: document.getElementById('employeeMaritalStatus').value,
+                contractType: document.getElementById('employeeContractType').value,
+                documents: Array.from(employeeFileContainer.querySelectorAll('.delete-file-btn')).map(btn => btn.dataset.filename)
+            };
+            
+            try {
+                const employeesCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/employees`);
+                await addDoc(employeesCollectionRef, newEmployee);
+            } catch (error) {
+                console.error("Error adding employee: ", error);
+            }
+
+            hideModal(addEmployeeModal);
+            e.target.reset();
+        });
+
+        editEmployeeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editEmployeeId').value;
+            
+            const updatedEmployee = {
+                name: document.getElementById('editEmployeeName').value,
+                position: document.getElementById('editEmployeePosition').value,
+                department: document.getElementById('editEmployeeDepartment').value,
+                hireDate: document.getElementById('editEmployeeHireDate').value,
+                salary: parseFloat(document.getElementById('editEmployeeSalary').value),
+                status: document.getElementById('editEmployeeStatus').value,
+                email: document.getElementById('editEmployeeEmail').value,
+                phone: document.getElementById('editEmployeePhone').value,
+                address: document.getElementById('editEmployeeAddress').value,
+                city: document.getElementById('editEmployeeCity').value,
+                state: document.getElementById('editEmployeeState').value,
+                cpf: document.getElementById('editEmployeeCpf').value,
+                rg: document.getElementById('editEmployeeRg').value,
+                birthDate: document.getElementById('editEmployeeBirthDate').value,
+                gender: document.getElementById('editEmployeeGender').value,
+                maritalStatus: document.getElementById('editEmployeeMaritalStatus').value,
+                contractType: document.getElementById('editEmployeeContractType').value,
+                documents: Array.from(editEmployeeFileContainer.querySelectorAll('.delete-file-btn')).map(btn => btn.dataset.filename)
             };
 
-            const payrollData = calculatePayroll();
-
-            function calculatePayroll() {
-                let totalGross = 0;
-                let totalDeductions = 0;
-                let totalBonus = 0;
-                const payrollList = employees.map(emp => {
-                    const baseSalary = emp.salary;
-                    const bonus = baseSalary * 0.1; // Simulated 10% bonus
-                    const deductions = baseSalary * 0.2; // Simulated 20% deductions (taxes, benefits, etc.)
-                    const netSalary = baseSalary + bonus - deductions;
-
-                    totalGross += baseSalary;
-                    totalBonus += bonus;
-                    totalDeductions += deductions;
-
-                    return {
-                        id: emp.id,
-                        name: emp.name,
-                        position: emp.position,
-                        baseSalary: baseSalary,
-                        bonus: bonus,
-                        deductions: deductions,
-                        netSalary: netSalary,
-                        status: 'Processado'
-                    };
-                });
-                return {
-                    list: payrollList,
-                    gross: totalGross,
-                    bonus: totalBonus,
-                    deductions: totalDeductions,
-                    net: totalGross + totalBonus - totalDeductions
-                };
+            try {
+                const employeeDocRef = doc(db, `artifacts/${appId}/users/${userId}/employees/${id}`);
+                await setDoc(employeeDocRef, updatedEmployee, { merge: true });
+            } catch (error) {
+                console.error("Error updating employee: ", error);
             }
 
-            dashboardData.totalPayroll = payrollData.net;
+            hideModal(editEmployeeModal);
+        });
 
-            // UI Elements
-            const sidebar = document.querySelector('.sidebar');
-            const mainContent = document.querySelector('.main-content');
-            const toggleSidebarBtn = document.getElementById('toggleSidebar');
-            const navItems = document.querySelectorAll('.nav-item');
-            const sectionContents = document.querySelectorAll('.section-content');
-            const pageTitle = document.getElementById('pageTitle');
-
-            // Modals
-            const addEmployeeModal = document.getElementById('addEmployeeModal');
-            const addEmployeeBtn = document.getElementById('addEmployeeBtn');
-            const cancelEmployeeBtn = document.getElementById('cancelEmployeeBtn');
-            const employeeForm = document.getElementById('employeeForm');
-            const employeeFileUploadBtn = document.getElementById('employeeFileUploadBtn');
-            const employeeFile = document.getElementById('employeeFile');
-            const employeeFileContainer = document.getElementById('employeeFileContainer');
-
-            const editEmployeeModal = document.getElementById('editEmployeeModal');
-            const cancelEditEmployeeBtn = document.getElementById('cancelEditEmployeeBtn');
-            const editEmployeeForm = document.getElementById('editEmployeeForm');
-            const editEmployeeFileUploadBtn = document.getElementById('editEmployeeFileUploadBtn');
-            const editEmployeeFile = document.getElementById('editEmployeeFile');
-            const editEmployeeFileContainer = document.getElementById('editEmployeeFileContainer');
-
-            const addDepartmentModal = document.getElementById('addDepartmentModal');
-            const addDepartmentBtn = document.getElementById('addDepartmentBtn');
-            const cancelDepartmentBtn = document.getElementById('cancelDepartmentBtn');
-            const departmentForm = document.getElementById('departmentForm');
-
-            const addPositionModal = document.getElementById('addPositionModal');
-            const addPositionBtn = document.getElementById('addPositionBtn');
-            const cancelPositionBtn = document.getElementById('cancelPositionBtn');
-            const positionForm = document.getElementById('positionForm');
-
-            const viewEmployeeModal = document.getElementById('viewEmployeeModal');
-            const closeViewEmployeeBtn = document.getElementById('closeEmployeeBtn');
-            const editEmployeeViewBtn = document.getElementById('editEmployeeViewBtn');
-
-            // Tab functionality for Settings
-            const tabBtns = document.querySelectorAll('.tab-btn');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            tabBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    tabBtns.forEach(b => b.classList.remove('border-b-2', 'border-blue-600', 'text-blue-600', 'hover:text-blue-600'));
-                    tabBtns.forEach(b => b.classList.add('text-gray-500', 'hover:text-blue-600'));
-                    btn.classList.add('border-b-2', 'border-blue-600', 'text-blue-600');
-                    
-                    tabContents.forEach(content => content.classList.add('hidden'));
-                    document.getElementById(`${btn.dataset.tab}Tab`).classList.remove('hidden');
-                });
-            });
-
-            // Event Listeners
-            toggleSidebarBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('collapsed');
-                mainContent.classList.toggle('ml-64');
-            });
-
-            navItems.forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    navItems.forEach(i => i.classList.remove('active'));
-                    item.classList.add('active');
-
-                    sectionContents.forEach(section => section.classList.add('hidden'));
-                    const targetSection = document.getElementById(`${item.dataset.section}Section`);
-                    if (targetSection) {
-                        targetSection.classList.remove('hidden');
-                        pageTitle.textContent = item.querySelector('.sidebar-text').textContent;
-                        if (item.dataset.section === 'dashboard') {
-                            renderDashboard();
-                        } else if (item.dataset.section === 'reports') {
-                            renderReports();
-                        } else if (item.dataset.section === 'employees') {
-                            renderEmployeesTable(employees);
-                        }
-                    }
-                });
-            });
-
-            addEmployeeBtn.addEventListener('click', () => {
-                employeeFileContainer.innerHTML = '';
-                showModal(addEmployeeModal);
-                updateSelectOptions();
-            });
-            cancelEmployeeBtn.addEventListener('click', () => hideModal(addEmployeeModal));
+        departmentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newDepartment = {
+                name: document.getElementById('departmentName').value,
+                manager: document.getElementById('departmentManager').value,
+                budget: parseFloat(document.getElementById('departmentBudget').value) || 0,
+                description: document.getElementById('departmentDescription').value,
+            };
             
-            editEmployeeViewBtn.addEventListener('click', () => {
-                const id = document.getElementById('editEmployeeViewBtn').dataset.id;
-                fillEditForm(id);
-                hideModal(viewEmployeeModal);
-                showModal(editEmployeeModal);
-            });
-            
-            cancelEditEmployeeBtn.addEventListener('click', () => hideModal(editEmployeeModal));
-            
-            closeViewEmployeeBtn.addEventListener('click', () => hideModal(viewEmployeeModal));
-
-            addDepartmentBtn.addEventListener('click', () => showModal(addDepartmentModal));
-            cancelDepartmentBtn.addEventListener('click', () => hideModal(addDepartmentModal));
-
-            addPositionBtn.addEventListener('click', () => showModal(addPositionModal));
-            cancelPositionBtn.addEventListener('click', () => hideModal(addPositionModal));
-            
-            employeeFileUploadBtn.addEventListener('click', () => {
-                employeeFile.click();
-            });
-
-            employeeFile.addEventListener('change', (e) => {
-                const files = Array.from(e.target.files);
-                files.forEach(file => {
-                    renderAddFileContainer(file.name);
-                });
-            });
-
-            editEmployeeFileUploadBtn.addEventListener('click', () => {
-                editEmployeeFile.click();
-            });
-            
-            editEmployeeFile.addEventListener('change', (e) => {
-                const files = Array.from(e.target.files);
-                const employeeId = document.getElementById('editEmployeeId').value;
-                const employee = employees.find(emp => emp.id === parseInt(employeeId));
-                if (employee) {
-                    files.forEach(file => {
-                        if (!employee.documents.includes(file.name)) {
-                            employee.documents.push(file.name);
-                        }
-                    });
-                    renderEditFileContainer(employee.documents);
-                }
-            });
-
-            function showModal(modal) {
-                modal.classList.remove('hidden');
-            }
-
-            function hideModal(modal) {
-                modal.classList.add('hidden');
+            try {
+                const departmentsCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/departments`);
+                await addDoc(departmentsCollectionRef, newDepartment);
+            } catch (error) {
+                console.error("Error adding department: ", error);
             }
             
-            function renderAddFileContainer(filename) {
-                 const fileIcon = filename.endsWith('.pdf') ? 'fas fa-file-pdf text-red-500' :
-                                         filename.endsWith('.jpg') || filename.endsWith('.png') ? 'fas fa-image text-blue-500' :
-                                         'fas fa-file text-gray-500';
-                const fileElement = document.createElement('div');
-                fileElement.className = 'border rounded p-3 flex items-center';
-                fileElement.innerHTML = `
-                    <i class="${fileIcon} text-xl mr-3"></i>
-                    <div>
-                        <p class="text-sm font-medium">${filename}</p>
-                    </div>
-                    <button class="ml-auto text-red-500 hover:text-red-700 delete-file-btn" data-filename="${filename}" data-container="add">
-                        <i class="fas fa-times"></i>
-                    </button>
+            hideModal(addDepartmentModal);
+            e.target.reset();
+        });
+
+        positionForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPosition = {
+                name: document.getElementById('positionName').value,
+                department: document.getElementById('positionDepartment').value,
+                baseSalary: parseFloat(document.getElementById('positionSalary').value) || 0,
+                description: document.getElementById('positionDescription').value,
+                requirements: document.getElementById('positionRequirements').value,
+            };
+
+            try {
+                const positionsCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/positions`);
+                await addDoc(positionsCollectionRef, newPosition);
+            } catch (error) {
+                console.error("Error adding position: ", error);
+            }
+
+            hideModal(addPositionModal);
+            e.target.reset();
+        });
+
+        function updateDashboardCounts() {
+            dashboardData.totalEmployees = employees.length;
+            dashboardData.totalDepartments = departments.length;
+            dashboardData.newHires = employees.filter(emp => new Date(emp.hireDate) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length;
+            
+            const payroll = calculatePayroll();
+            dashboardData.totalPayroll = payroll.net;
+
+            document.getElementById('totalEmployees').textContent = dashboardData.totalEmployees;
+            document.getElementById('totalDepartments').textContent = dashboardData.totalDepartments;
+            document.getElementById('totalPayroll').textContent = dashboardData.totalPayroll.toFixed(2);
+            document.getElementById('newHires').textContent = dashboardData.newHires;
+        }
+
+        function updateDepartmentAndPositionCounts() {
+            // Reset counts
+            departments.forEach(dept => dept.employees = 0);
+            positions.forEach(pos => pos.employees = 0);
+
+            // Recalculate counts
+            employees.forEach(emp => {
+                const dept = departments.find(d => d.name === emp.department);
+                if (dept) dept.employees++;
+                const pos = positions.find(p => p.name === emp.position);
+                if (pos) pos.employees++;
+            });
+        }
+
+        function renderDashboard() {
+            updateDashboardCounts();
+            
+            // Render Recent Hires
+            const recentHiresTable = document.getElementById('recentHiresTable');
+            recentHiresTable.innerHTML = '';
+            employees.slice(-5).reverse().forEach(emp => {
+                const row = `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${emp.name}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${emp.position}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${emp.department}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(emp.hireDate).toLocaleDateString('pt-BR')}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">${emp.status}</span>
+                        </td>
+                    </tr>
                 `;
-                employeeFileContainer.appendChild(fileElement);
-            }
-
-            function renderEditFileContainer(documents) {
-                editEmployeeFileContainer.innerHTML = '';
-                if (documents.length === 0) {
-                    editEmployeeFileContainer.innerHTML = `<p class="text-gray-400">Nenhum documento anexado.</p>`;
-                } else {
-                    documents.forEach(doc => {
-                        const fileIcon = doc.endsWith('.pdf') ? 'fas fa-file-pdf text-red-500' :
-                                         doc.endsWith('.jpg') || doc.endsWith('.png') ? 'fas fa-image text-blue-500' :
-                                         'fas fa-file text-gray-500';
-                        const fileElement = document.createElement('div');
-                        fileElement.className = 'border rounded p-3 flex items-center';
-                        fileElement.innerHTML = `
-                            <i class="${fileIcon} text-xl mr-3"></i>
-                            <div>
-                                <p class="text-sm font-medium">${doc}</p>
-                            </div>
-                            <button class="ml-auto text-red-500 hover:text-red-700 delete-file-btn" data-filename="${doc}" data-container="edit">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        `;
-                        editEmployeeFileContainer.appendChild(fileElement);
-                    });
-                    document.querySelectorAll('.delete-file-btn[data-container="edit"]').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            const filename = e.currentTarget.dataset.filename;
-                            const employeeId = document.getElementById('editEmployeeId').value;
-                            const employee = employees.find(emp => emp.id === parseInt(employeeId));
-                            if (employee) {
-                                employee.documents = employee.documents.filter(doc => doc !== filename);
-                                renderEditFileContainer(employee.documents);
-                            }
-                        });
-                    });
-                }
-            }
-
-            employeeForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const newEmployee = {
-                    id: currentEmployeeId++,
-                    name: document.getElementById('employeeName').value,
-                    position: document.getElementById('employeePosition').value,
-                    department: document.getElementById('employeeDepartment').value,
-                    hireDate: document.getElementById('employeeHireDate').value,
-                    salary: parseFloat(document.getElementById('employeeSalary').value),
-                    status: document.getElementById('employeeStatus').value,
-                    email: document.getElementById('employeeEmail').value,
-                    phone: document.getElementById('employeePhone').value,
-                    address: document.getElementById('employeeAddress').value,
-                    city: document.getElementById('employeeCity').value,
-                    state: document.getElementById('employeeState').value,
-                    cpf: document.getElementById('employeeCpf').value,
-                    rg: document.getElementById('employeeRg').value,
-                    birthDate: document.getElementById('employeeBirthDate').value,
-                    gender: document.getElementById('employeeGender').value,
-                    maritalStatus: document.getElementById('employeeMaritalStatus').value,
-                    contractType: document.getElementById('employeeContractType').value,
-                    documents: Array.from(employeeFileContainer.querySelectorAll('.delete-file-btn')).map(btn => btn.dataset.filename)
-                };
-                employees.push(newEmployee);
-                updateDashboardCounts();
-                renderTables();
-                hideModal(addEmployeeModal);
-                e.target.reset();
+                recentHiresTable.innerHTML += row;
             });
 
-            editEmployeeForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const id = parseInt(document.getElementById('editEmployeeId').value);
-                const employeeIndex = employees.findIndex(emp => emp.id === id);
-
-                if (employeeIndex > -1) {
-                    employees[employeeIndex] = {
-                        ...employees[employeeIndex],
-                        name: document.getElementById('editEmployeeName').value,
-                        position: document.getElementById('editEmployeePosition').value,
-                        department: document.getElementById('editEmployeeDepartment').value,
-                        hireDate: document.getElementById('editEmployeeHireDate').value,
-                        salary: parseFloat(document.getElementById('editEmployeeSalary').value),
-                        status: document.getElementById('editEmployeeStatus').value,
-                        email: document.getElementById('editEmployeeEmail').value,
-                        phone: document.getElementById('editEmployeePhone').value,
-                        address: document.getElementById('editEmployeeAddress').value,
-                        city: document.getElementById('editEmployeeCity').value,
-                        state: document.getElementById('editEmployeeState').value,
-                        cpf: document.getElementById('editEmployeeCpf').value,
-                        rg: document.getElementById('editEmployeeRg').value,
-                        birthDate: document.getElementById('editEmployeeBirthDate').value,
-                        gender: document.getElementById('editEmployeeGender').value,
-                        maritalStatus: document.getElementById('editEmployeeMaritalStatus').value,
-                        contractType: document.getElementById('editEmployeeContractType').value,
-                        documents: Array.from(editEmployeeFileContainer.querySelectorAll('.delete-file-btn')).map(btn => btn.dataset.filename)
-                    };
-                }
-                updateDashboardCounts();
-                renderTables();
-                hideModal(editEmployeeModal);
-            });
-
-            departmentForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const newDepartment = {
-                    id: currentDepartmentId++,
-                    name: document.getElementById('departmentName').value,
-                    manager: document.getElementById('departmentManager').value,
-                    budget: parseFloat(document.getElementById('departmentBudget').value) || 0,
-                    description: document.getElementById('departmentDescription').value,
-                    employees: 0
-                };
-                departments.push(newDepartment);
-                updateDashboardCounts();
-                renderTables();
-                updateSelectOptions();
-                hideModal(addDepartmentModal);
-                e.target.reset();
-            });
-
-            positionForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const newPosition = {
-                    id: currentPositionId++,
-                    name: document.getElementById('positionName').value,
-                    department: document.getElementById('positionDepartment').value,
-                    baseSalary: parseFloat(document.getElementById('positionSalary').value) || 0,
-                    description: document.getElementById('positionDescription').value,
-                    requirements: document.getElementById('positionRequirements').value,
-                    employees: 0
-                };
-                positions.push(newPosition);
-                updateDashboardCounts();
-                renderTables();
-                updateSelectOptions();
-                hideModal(addPositionModal);
-                e.target.reset();
-            });
-
-            function updateDashboardCounts() {
-                dashboardData.totalEmployees = employees.length;
-                dashboardData.totalDepartments = departments.length;
-                dashboardData.newHires = employees.filter(emp => new Date(emp.hireDate) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length;
-                
-                const payroll = calculatePayroll();
-                dashboardData.totalPayroll = payroll.net;
-
-                document.getElementById('totalEmployees').textContent = dashboardData.totalEmployees;
-                document.getElementById('totalDepartments').textContent = dashboardData.totalDepartments;
-                document.getElementById('totalPayroll').textContent = dashboardData.totalPayroll.toFixed(2);
-                document.getElementById('newHires').textContent = dashboardData.newHires;
-            }
-
-            function updateDepartmentAndPositionCounts() {
-                // Reset counts
-                departments.forEach(dept => dept.employees = 0);
-                positions.forEach(pos => pos.employees = 0);
-
-                // Recalculate counts
-                employees.forEach(emp => {
-                    const dept = departments.find(d => d.name === emp.department);
-                    if (dept) dept.employees++;
-                    const pos = positions.find(p => p.name === emp.position);
-                    if (pos) pos.employees++;
-                });
-            }
-
-            function renderDashboard() {
-                updateDashboardCounts();
-                
-                // Render Recent Hires
-                const recentHiresTable = document.getElementById('recentHiresTable');
-                recentHiresTable.innerHTML = '';
-                employees.slice(-5).reverse().forEach(emp => {
-                    const row = `
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${emp.name}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${emp.position}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${emp.department}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(emp.hireDate).toLocaleDateString('pt-BR')}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">${emp.status}</span>
-                            </td>
-                        </tr>
-                    `;
-                    recentHiresTable.innerHTML += row;
-                });
-
-                // Department distribution chart
-                const deptLabels = departments.map(d => d.name);
-                const deptData = departments.map(d => d.employees);
-                const deptColors = ['#4F46E5', '#10B981', '#F59E0B', '#6366F1', '#34D399'];
-                
-                new Chart(document.getElementById('departmentChart'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: deptLabels,
-                        datasets: [{
-                            data: deptData,
-                            backgroundColor: deptColors,
-                            hoverOffset: 4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                            },
-                            title: {
-                                display: false,
-                            }
-                        }
-                    }
-                });
-
-                // Position distribution chart
-                const positionLabels = positions.map(p => p.name);
-                const positionData = positions.map(p => p.employees);
-                
-                new Chart(document.getElementById('positionChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: positionLabels,
-                        datasets: [{
-                            label: 'Número de Funcionários',
-                            data: positionData,
-                            backgroundColor: '#4F46E5',
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false,
-                            }
+            // Department distribution chart
+            const deptLabels = departments.map(d => d.name);
+            const deptData = departments.map(d => d.employees);
+            const deptColors = ['#4F46E5', '#10B981', '#F59E0B', '#6366F1', '#34D399'];
+            
+            new Chart(document.getElementById('departmentChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: deptLabels,
+                    datasets: [{
+                        data: deptData,
+                        backgroundColor: deptColors,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
+                        title: {
+                            display: false,
                         }
                     }
-                });
-            }
+                }
+            });
 
-            function renderEmployeesTable(data) {
-                const tableBody = document.getElementById('employeesTable');
-                tableBody.innerHTML = '';
-                data.forEach(emp => {
-                    const statusColor = emp.status === 'Ativo' ? 'bg-green-100 text-green-800' :
-                        emp.status === 'Férias' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800';
-                    const row = `
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${emp.id}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${emp.name}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${emp.position}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${emp.department}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ ${emp.salary.toFixed(2)}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}">${emp.status}</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button class="view-employee text-blue-600 hover:text-blue-900 mr-3" data-id="${emp.id}">Ver</button>
-                                <button class="edit-employee text-yellow-600 hover:text-yellow-900 mr-3" data-id="${emp.id}">Editar</button>
-                                <button class="delete-employee text-red-600 hover:text-red-900" data-id="${emp.id}">Excluir</button>
-                            </td>
-                        </tr>
-                    `;
-                    tableBody.innerHTML += row;
-                });
-                attachEmployeeListeners();
-            }
-
-            function renderDepartmentsTable(data) {
-                const tableBody = document.getElementById('departmentsTable');
-                tableBody.innerHTML = '';
-                data.forEach(dept => {
-                    const row = `
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${dept.id}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dept.name}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dept.manager || 'Nenhum'}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dept.employees}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ ${dept.budget.toFixed(2)}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button class="edit-department text-yellow-600 hover:text-yellow-900 mr-3" data-id="${dept.id}">Editar</button>
-                                <button class="delete-department text-red-600 hover:text-red-900" data-id="${dept.id}">Excluir</button>
-                            </td>
-                        </tr>
-                    `;
-                    tableBody.innerHTML += row;
-                });
-            }
-
-            function renderPositionsTable(data) {
-                const tableBody = document.getElementById('positionsTable');
-                tableBody.innerHTML = '';
-                data.forEach(pos => {
-                    const row = `
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${pos.id}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${pos.name}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${pos.department}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ ${pos.baseSalary.toFixed(2)}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${pos.employees}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button class="edit-position text-yellow-600 hover:text-yellow-900 mr-3" data-id="${pos.id}">Editar</button>
-                                <button class="delete-position text-red-600 hover:text-red-900" data-id="${pos.id}">Excluir</button>
-                            </td>
-                        </tr>
-                    `;
-                    tableBody.innerHTML += row;
-                });
-            }
-
-            function renderPayrollTable(data) {
-                const tableBody = document.getElementById('payrollTable');
-                tableBody.innerHTML = '';
-                data.forEach(item => {
-                    const row = `
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.id}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.name}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.position}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ ${item.baseSalary.toFixed(2)}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">R$ ${item.bonus.toFixed(2)}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">R$ ${item.deductions.toFixed(2)}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">R$ ${item.netSalary.toFixed(2)}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">${item.status}</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button class="view-payroll-details text-blue-600 hover:text-blue-900 mr-3" data-id="${item.id}">Ver</button>
-                            </td>
-                        </tr>
-                    `;
-                    tableBody.innerHTML += row;
-                });
-                const payroll = calculatePayroll();
-                document.getElementById('payrollGross').textContent = payroll.gross.toFixed(2);
-                document.getElementById('payrollBonus').textContent = payroll.bonus.toFixed(2);
-                document.getElementById('payrollDeductions').textContent = payroll.deductions.toFixed(2);
-                document.getElementById('payrollNet').textContent = payroll.net.toFixed(2);
-
-                new Chart(document.getElementById('payrollDeptChart'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: departments.map(d => d.name),
-                        datasets: [{
-                            data: departments.map(d => {
-                                const employeesInDept = employees.filter(e => e.department === d.name);
-                                return employeesInDept.reduce((sum, emp) => sum + emp.salary, 0);
-                            }),
-                            backgroundColor: ['#4F46E5', '#10B981', '#F59E0B', '#6366F1', '#34D399'],
-                            hoverOffset: 4
-                        }]
+            // Position distribution chart
+            const positionLabels = positions.map(p => p.name);
+            const positionData = positions.map(p => p.employees);
+            
+            new Chart(document.getElementById('positionChart'), {
+                type: 'bar',
+                data: {
+                    labels: positionLabels,
+                    datasets: [{
+                        label: 'Número de Funcionários',
+                        data: positionData,
+                        backgroundColor: '#4F46E5',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false,
+                        }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                            },
-                            title: {
-                                display: false,
-                            }
+                    scales: {
+                        y: {
+                            beginAtZero: true
                         }
                     }
-                });
-            }
+                }
+            });
+        }
 
-            function renderReports() {
-                 // Simulated data for charts
-                const hiresData = [10, 12, 8, 15, 11, 14];
-                const terminationsData = [5, 3, 6, 4, 7, 5];
-                const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+        function renderEmployeesTable(data) {
+            const tableBody = document.getElementById('employeesTable');
+            tableBody.innerHTML = '';
+            data.forEach(emp => {
+                const statusColor = emp.status === 'Ativo' ? 'bg-green-100 text-green-800' :
+                    emp.status === 'Férias' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800';
+                const row = `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${emp.id}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${emp.name}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${emp.position}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${emp.department}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ ${emp.salary.toFixed(2)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}">${emp.status}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button class="view-employee text-blue-600 hover:text-blue-900 mr-3" data-id="${emp.id}">Ver</button>
+                            <button class="edit-employee text-yellow-600 hover:text-yellow-900 mr-3" data-id="${emp.id}">Editar</button>
+                            <button class="delete-employee text-red-600 hover:text-red-900" data-id="${emp.id}">Excluir</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+            attachEmployeeListeners();
+        }
 
-                const genderData = {
-                    'Masculino': employees.filter(e => e.gender === 'Masculino').length,
-                    'Feminino': employees.filter(e => e.gender === 'Feminino').length,
-                    'Outro': employees.filter(e => e.gender === 'Outro').length
-                };
+        function renderDepartmentsTable(data) {
+            const tableBody = document.getElementById('departmentsTable');
+            tableBody.innerHTML = '';
+            data.forEach(dept => {
+                const row = `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${dept.id}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dept.name}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dept.manager || 'Nenhum'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${employees.filter(e => e.department === dept.name).length}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ ${dept.budget.toFixed(2)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button class="edit-department text-yellow-600 hover:text-yellow-900 mr-3" data-id="${dept.id}">Editar</button>
+                            <button class="delete-department text-red-600 hover:text-red-900" data-id="${dept.id}">Excluir</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        }
 
-                const payrollTrendData = [
-                    250000, 260000, 275000, 270000, 280000, 290000, 285000, 295000, 300000, 310000, 305000, 315000
-                ];
-                const payrollMonths = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        function renderPositionsTable(data) {
+            const tableBody = document.getElementById('positionsTable');
+            tableBody.innerHTML = '';
+            data.forEach(pos => {
+                const row = `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${pos.id}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${pos.name}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${pos.department}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ ${pos.baseSalary.toFixed(2)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${employees.filter(e => e.position === pos.name).length}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button class="edit-position text-yellow-600 hover:text-yellow-900 mr-3" data-id="${pos.id}">Editar</button>
+                            <button class="delete-position text-red-600 hover:text-red-900" data-id="${pos.id}">Excluir</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        }
 
+        function renderPayrollTable(data) {
+            const tableBody = document.getElementById('payrollTable');
+            tableBody.innerHTML = '';
+            data.forEach(item => {
+                const row = `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.id}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.name}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.position}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ ${item.baseSalary.toFixed(2)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">R$ ${item.bonus.toFixed(2)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">R$ ${item.deductions.toFixed(2)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">R$ ${item.netSalary.toFixed(2)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">${item.status}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button class="view-payroll-details text-blue-600 hover:text-blue-900 mr-3" data-id="${item.id}">Ver</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+            const payroll = calculatePayroll();
+            document.getElementById('payrollGross').textContent = payroll.gross.toFixed(2);
+            document.getElementById('payrollBonus').textContent = payroll.bonus.toFixed(2);
+            document.getElementById('payrollDeductions').textContent = payroll.deductions.toFixed(2);
+            document.getElementById('payrollNet').textContent = payroll.net.toFixed(2);
 
-                // Hires vs Terminations Chart
-                new Chart(document.getElementById('hiresTerminationsChart'), {
-                    type: 'line',
-                    data: {
-                        labels: months,
-                        datasets: [{
-                            label: 'Contratações',
-                            data: hiresData,
-                            borderColor: '#4F46E5',
-                            backgroundColor: 'rgba(79, 70, 229, 0.2)',
-                            tension: 0.1
-                        }, {
-                            label: 'Desligamentos',
-                            data: terminationsData,
-                            borderColor: '#DC2626',
-                            backgroundColor: 'rgba(220, 38, 38, 0.2)',
-                            tension: 0.1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
+            new Chart(document.getElementById('payrollDeptChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: departments.map(d => d.name),
+                    datasets: [{
+                        data: departments.map(d => {
+                            const employeesInDept = employees.filter(e => e.department === d.name);
+                            return employeesInDept.reduce((sum, emp) => sum + emp.salary, 0);
+                        }),
+                        backgroundColor: ['#4F46E5', '#10B981', '#F59E0B', '#6366F1', '#34D399'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        title: {
+                            display: false,
+                        }
                     }
-                });
-                
-                // Gender Distribution Chart
-                new Chart(document.getElementById('genderChart'), {
-                    type: 'pie',
-                    data: {
-                        labels: Object.keys(genderData),
-                        datasets: [{
-                            data: Object.values(genderData),
-                            backgroundColor: ['#4F46E5', '#EC4899', '#6B7280'],
-                            hoverOffset: 4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                            },
-                            title: {
-                                display: false,
-                            }
+                }
+            });
+        }
+
+        function renderReports() {
+             // Simulated data for charts
+            const hiresData = [10, 12, 8, 15, 11, 14];
+            const terminationsData = [5, 3, 6, 4, 7, 5];
+            const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+
+            const genderData = {
+                'Masculino': employees.filter(e => e.gender === 'Masculino').length,
+                'Feminino': employees.filter(e => e.gender === 'Feminino').length,
+                'Outro': employees.filter(e => e.gender === 'Outro').length
+            };
+
+            const payrollTrendData = [
+                250000, 260000, 275000, 270000, 280000, 290000, 285000, 295000, 300000, 310000, 305000, 315000
+            ];
+            const payrollMonths = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+
+            // Hires vs Terminations Chart
+            new Chart(document.getElementById('hiresTerminationsChart'), {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Contratações',
+                        data: hiresData,
+                        borderColor: '#4F46E5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                        tension: 0.1
+                    }, {
+                        label: 'Desligamentos',
+                        data: terminationsData,
+                        borderColor: '#DC2626',
+                        backgroundColor: 'rgba(220, 38, 38, 0.2)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                }
+            });
+            
+            // Gender Distribution Chart
+            new Chart(document.getElementById('genderChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(genderData),
+                    datasets: [{
+                        data: Object.values(genderData),
+                        backgroundColor: ['#4F46E5', '#EC4899', '#6B7280'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        title: {
+                            display: false,
                         }
                     }
                 });
