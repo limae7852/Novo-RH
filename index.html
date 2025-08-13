@@ -1016,6 +1016,197 @@
         </div>
     </div>
 
+    <div id="editEmployeeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-screen overflow-y-auto">
+            <div class="p-6 border-b">
+                <h3 class="text-xl font-semibold">Editar Funcionário</h3>
+            </div>
+            <form id="editEmployeeForm" class="p-6">
+                <input type="hidden" id="editEmployeeId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="text-lg font-medium mb-4">Informações Pessoais</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo*</label>
+                                <input type="text" id="editEmployeeName" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">CPF*</label>
+                                    <input type="text" id="editEmployeeCpf" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">RG</label>
+                                    <input type="text" id="editEmployeeRg" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento*</label>
+                                    <input type="date" id="editEmployeeBirthDate" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Gênero</label>
+                                    <select id="editEmployeeGender" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="Masculino">Masculino</option>
+                                        <option value="Feminino">Feminino</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Estado Civil</label>
+                                <select id="editEmployeeMaritalStatus" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="Solteiro(a)">Solteiro(a)</option>
+                                    <option value="Casado(a)">Casado(a)</option>
+                                    <option value="Divorciado(a)">Divorciado(a)</option>
+                                    <option value="Viúvo(a)">Viúvo(a)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-medium mb-4">Contato</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Email*</label>
+                                <input type="email" id="editEmployeeEmail" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Telefone*</label>
+                                <input type="tel" id="editEmployeePhone" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Endereço*</label>
+                                <input type="text" id="editEmployeeAddress" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Cidade*</label>
+                                    <input type="text" id="editEmployeeCity" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Estado*</label>
+                                    <select id="editEmployeeState" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                        <option value="AC">Acre</option>
+                                        <option value="AL">Alagoas</option>
+                                        <option value="AP">Amapá</option>
+                                        <option value="AM">Amazonas</option>
+                                        <option value="BA">Bahia</option>
+                                        <option value="CE">Ceará</option>
+                                        <option value="DF">Distrito Federal</option>
+                                        <option value="ES">Espírito Santo</option>
+                                        <option value="GO">Goiás</option>
+                                        <option value="MA">Maranhão</option>
+                                        <option value="MT">Mato Grosso</option>
+                                        <option value="MS">Mato Grosso do Sul</option>
+                                        <option value="MG">Minas Gerais</option>
+                                        <option value="PA">Pará</option>
+                                        <option value="PB">Paraíba</option>
+                                        <option value="PR">Paraná</option>
+                                        <option value="PE">Pernambuco</option>
+                                        <option value="PI">Piauí</option>
+                                        <option value="RJ">Rio de Janeiro</option>
+                                        <option value="RN">Rio Grande do Norte</option>
+                                        <option value="RS">Rio Grande do Sul</option>
+                                        <option value="RO">Rondônia</option>
+                                        <option value="RR">Roraima</option>
+                                        <option value="SC">Santa Catarina</option>
+                                        <option value="SP">São Paulo</option>
+                                        <option value="SE">Sergipe</option>
+                                        <option value="TO">Tocantins</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8">
+                    <h4 class="text-lg font-medium mb-4">Informações Profissionais</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Departamento*</label>
+                                    <select id="editEmployeeDepartment" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                        <option value="">Selecione um departamento</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Cargo*</label>
+                                    <select id="editEmployeePosition" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                        <option value="">Selecione um cargo</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Data de Admissão*</label>
+                                    <input type="date" id="editEmployeeHireDate" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Contrato*</label>
+                                    <select id="editEmployeeContractType" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                        <option value="CLT">CLT</option>
+                                        <option value="PJ">PJ</option>
+                                        <option value="Estágio">Estágio</option>
+                                        <option value="Temporário">Temporário</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Salário*</label>
+                                    <input type="number" id="editEmployeeSalary" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Status*</label>
+                                    <select id="editEmployeeStatus" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                        <option value="Ativo">Ativo</option>
+                                        <option value="Inativo">Inativo</option>
+                                        <option value="Férias">Férias</option>
+                                        <option value="Licença">Licença</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8">
+                    <h4 class="text-lg font-medium mb-4">Documentos</h4>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                        <div class="text-center">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
+                            <p class="text-sm text-gray-500 mb-2">Arraste e solte os arquivos aqui ou</p>
+                            <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">Selecionar Arquivos</button>
+                            <p class="text-xs text-gray-500 mt-2">Formatos aceitos: PDF, JPG, PNG (Max. 5MB cada)</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="border rounded p-3 flex items-center">
+                            <i class="fas fa-file-pdf text-red-500 text-xl mr-3"></i>
+                            <div>
+                                <p class="text-sm font-medium">Documento.pdf</p>
+                                <p class="text-xs text-gray-500">1.2MB</p>
+                            </div>
+                            <button class="ml-auto text-red-500 hover:text-red-700">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex justify-end space-x-3">
+                    <button type="button" id="cancelEditEmployeeBtn" class="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="addDepartmentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
             <div class="p-6 border-b">
@@ -1093,7 +1284,7 @@
             <div class="p-6 border-b flex justify-between items-center">
                 <h3 class="text-xl font-semibold">Detalhes do Funcionário</h3>
                 <div class="flex space-x-2">
-                    <button id="editEmployeeBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">
+                    <button id="editEmployeeViewBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">
                         <i class="fas fa-edit mr-1"></i> Editar
                     </button>
                     <button id="closeEmployeeBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm">
@@ -1417,6 +1608,10 @@
             const cancelEmployeeBtn = document.getElementById('cancelEmployeeBtn');
             const employeeForm = document.getElementById('employeeForm');
 
+            const editEmployeeModal = document.getElementById('editEmployeeModal');
+            const cancelEditEmployeeBtn = document.getElementById('cancelEditEmployeeBtn');
+            const editEmployeeForm = document.getElementById('editEmployeeForm');
+
             const addDepartmentModal = document.getElementById('addDepartmentModal');
             const addDepartmentBtn = document.getElementById('addDepartmentBtn');
             const cancelDepartmentBtn = document.getElementById('cancelDepartmentBtn');
@@ -1429,6 +1624,7 @@
 
             const viewEmployeeModal = document.getElementById('viewEmployeeModal');
             const closeViewEmployeeBtn = document.getElementById('closeEmployeeBtn');
+            const editEmployeeViewBtn = document.getElementById('editEmployeeViewBtn');
 
             // Tab functionality for Settings
             const tabBtns = document.querySelectorAll('.tab-btn');
@@ -1466,6 +1662,8 @@
                             renderDashboard();
                         } else if (item.dataset.section === 'reports') {
                             renderReports();
+                        } else if (item.dataset.section === 'employees') {
+                            renderEmployeesTable(employees);
                         }
                     }
                 });
@@ -1476,6 +1674,16 @@
                 updateSelectOptions();
             });
             cancelEmployeeBtn.addEventListener('click', () => hideModal(addEmployeeModal));
+            
+            editEmployeeViewBtn.addEventListener('click', () => {
+                const id = document.getElementById('editEmployeeId').value;
+                fillEditForm(id);
+                hideModal(viewEmployeeModal);
+                showModal(editEmployeeModal);
+            });
+            
+            cancelEditEmployeeBtn.addEventListener('click', () => hideModal(editEmployeeModal));
+            
             closeViewEmployeeBtn.addEventListener('click', () => hideModal(viewEmployeeModal));
 
             addDepartmentBtn.addEventListener('click', () => showModal(addDepartmentModal));
@@ -1519,6 +1727,38 @@
                 renderTables();
                 hideModal(addEmployeeModal);
                 e.target.reset();
+            });
+
+            editEmployeeForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = parseInt(document.getElementById('editEmployeeId').value);
+                const employeeIndex = employees.findIndex(emp => emp.id === id);
+
+                if (employeeIndex > -1) {
+                    employees[employeeIndex] = {
+                        ...employees[employeeIndex],
+                        name: document.getElementById('editEmployeeName').value,
+                        position: document.getElementById('editEmployeePosition').value,
+                        department: document.getElementById('editEmployeeDepartment').value,
+                        hireDate: document.getElementById('editEmployeeHireDate').value,
+                        salary: parseFloat(document.getElementById('editEmployeeSalary').value),
+                        status: document.getElementById('editEmployeeStatus').value,
+                        email: document.getElementById('editEmployeeEmail').value,
+                        phone: document.getElementById('editEmployeePhone').value,
+                        address: document.getElementById('editEmployeeAddress').value,
+                        city: document.getElementById('editEmployeeCity').value,
+                        state: document.getElementById('editEmployeeState').value,
+                        cpf: document.getElementById('editEmployeeCpf').value,
+                        rg: document.getElementById('editEmployeeRg').value,
+                        birthDate: document.getElementById('editEmployeeBirthDate').value,
+                        gender: document.getElementById('editEmployeeGender').value,
+                        maritalStatus: document.getElementById('editEmployeeMaritalStatus').value,
+                        contractType: document.getElementById('editEmployeeContractType').value
+                    };
+                }
+                updateDashboardCounts();
+                renderTables();
+                hideModal(editEmployeeModal);
             });
 
             departmentForm.addEventListener('submit', (e) => {
@@ -1885,9 +2125,33 @@
                     }
                 });
             }
+            
+            function fillEditForm(id) {
+                const employee = employees.find(emp => emp.id === parseInt(id));
+                if (employee) {
+                    document.getElementById('editEmployeeId').value = employee.id;
+                    document.getElementById('editEmployeeName').value = employee.name;
+                    document.getElementById('editEmployeeCpf').value = employee.cpf;
+                    document.getElementById('editEmployeeRg').value = employee.rg;
+                    document.getElementById('editEmployeeBirthDate').value = employee.birthDate;
+                    document.getElementById('editEmployeeGender').value = employee.gender;
+                    document.getElementById('editEmployeeMaritalStatus').value = employee.maritalStatus;
+                    document.getElementById('editEmployeeEmail').value = employee.email;
+                    document.getElementById('editEmployeePhone').value = employee.phone;
+                    document.getElementById('editEmployeeAddress').value = employee.address;
+                    document.getElementById('editEmployeeCity').value = employee.city;
+                    document.getElementById('editEmployeeState').value = employee.state;
+                    document.getElementById('editEmployeeDepartment').value = employee.department;
+                    document.getElementById('editEmployeePosition').value = employee.position;
+                    document.getElementById('editEmployeeHireDate').value = employee.hireDate;
+                    document.getElementById('editEmployeeContractType').value = employee.contractType;
+                    document.getElementById('editEmployeeSalary').value = employee.salary;
+                    document.getElementById('editEmployeeStatus').value = employee.status;
+                }
+            }
 
             function updateSelectOptions() {
-                const deptSelects = document.querySelectorAll('#employeeDepartment, #departmentManager, #positionDepartment, #employeeFilterDept, #positionFilterDept');
+                const deptSelects = document.querySelectorAll('#employeeDepartment, #departmentManager, #positionDepartment, #employeeFilterDept, #positionFilterDept, #editEmployeeDepartment');
                 deptSelects.forEach(select => {
                     const isDeptFilter = select.id === 'employeeFilterDept' || select.id === 'positionFilterDept';
                     const isManagerSelect = select.id === 'departmentManager';
@@ -1915,7 +2179,7 @@
                     });
                 });
 
-                const positionSelects = document.querySelectorAll('#employeePosition');
+                const positionSelects = document.querySelectorAll('#employeePosition, #editEmployeePosition');
                 positionSelects.forEach(select => {
                     select.innerHTML = '<option value="">Selecione um cargo</option>';
                     positions.forEach(pos => {
@@ -1957,9 +2221,19 @@
                             document.getElementById('viewEmployeeHireDate').textContent = new Date(employee.hireDate).toLocaleDateString('pt-BR');
                             document.getElementById('viewEmployeeSalary').textContent = `R$ ${employee.salary.toFixed(2)}`;
                             document.getElementById('viewEmployeeContractType').textContent = employee.contractType;
+                            
+                            document.getElementById('editEmployeeViewBtn').dataset.id = employee.id;
 
                             showModal(viewEmployeeModal);
                         }
+                    });
+                });
+                
+                document.querySelectorAll('.edit-employee').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const id = e.target.dataset.id;
+                        fillEditForm(id);
+                        showModal(editEmployeeModal);
                     });
                 });
                 
