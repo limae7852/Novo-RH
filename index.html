@@ -1008,21 +1008,13 @@
                         <div class="text-center">
                             <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
                             <p class="text-sm text-gray-500 mb-2">Arraste e solte os arquivos aqui ou</p>
-                            <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">Selecionar Arquivos</button>
+                            <input type="file" id="employeeFile" class="hidden" multiple>
+                            <button type="button" id="employeeFileUploadBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">Selecionar Arquivos</button>
                             <p class="text-xs text-gray-500 mt-2">Formatos aceitos: PDF, JPG, PNG (Max. 5MB cada)</p>
                         </div>
                     </div>
-                    <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="border rounded p-3 flex items-center">
-                            <i class="fas fa-file-pdf text-red-500 text-xl mr-3"></i>
-                            <div>
-                                <p class="text-sm font-medium">Documento.pdf</p>
-                                <p class="text-xs text-gray-500">1.2MB</p>
-                            </div>
-                            <button class="ml-auto text-red-500 hover:text-red-700">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4" id="employeeFileContainer">
+                        <!-- Documents will be inserted here -->
                     </div>
                 </div>
                 
@@ -1628,6 +1620,9 @@
             const addEmployeeBtn = document.getElementById('addEmployeeBtn');
             const cancelEmployeeBtn = document.getElementById('cancelEmployeeBtn');
             const employeeForm = document.getElementById('employeeForm');
+            const employeeFileUploadBtn = document.getElementById('employeeFileUploadBtn');
+            const employeeFile = document.getElementById('employeeFile');
+            const employeeFileContainer = document.getElementById('employeeFileContainer');
 
             const editEmployeeModal = document.getElementById('editEmployeeModal');
             const cancelEditEmployeeBtn = document.getElementById('cancelEditEmployeeBtn');
@@ -1694,13 +1689,14 @@
             });
 
             addEmployeeBtn.addEventListener('click', () => {
+                employeeFileContainer.innerHTML = '';
                 showModal(addEmployeeModal);
                 updateSelectOptions();
             });
             cancelEmployeeBtn.addEventListener('click', () => hideModal(addEmployeeModal));
             
             editEmployeeViewBtn.addEventListener('click', () => {
-                const id = document.getElementById('editEmployeeId').value;
+                const id = document.getElementById('editEmployeeViewBtn').dataset.id;
                 fillEditForm(id);
                 hideModal(viewEmployeeModal);
                 showModal(editEmployeeModal);
@@ -1716,6 +1712,17 @@
             addPositionBtn.addEventListener('click', () => showModal(addPositionModal));
             cancelPositionBtn.addEventListener('click', () => hideModal(addPositionModal));
             
+            employeeFileUploadBtn.addEventListener('click', () => {
+                employeeFile.click();
+            });
+
+            employeeFile.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files);
+                files.forEach(file => {
+                    renderAddFileContainer(file.name);
+                });
+            });
+
             editEmployeeFileUploadBtn.addEventListener('click', () => {
                 editEmployeeFile.click();
             });
@@ -1741,6 +1748,60 @@
             function hideModal(modal) {
                 modal.classList.add('hidden');
             }
+            
+            function renderAddFileContainer(filename) {
+                 const fileIcon = filename.endsWith('.pdf') ? 'fas fa-file-pdf text-red-500' :
+                                         filename.endsWith('.jpg') || filename.endsWith('.png') ? 'fas fa-image text-blue-500' :
+                                         'fas fa-file text-gray-500';
+                const fileElement = document.createElement('div');
+                fileElement.className = 'border rounded p-3 flex items-center';
+                fileElement.innerHTML = `
+                    <i class="${fileIcon} text-xl mr-3"></i>
+                    <div>
+                        <p class="text-sm font-medium">${filename}</p>
+                    </div>
+                    <button class="ml-auto text-red-500 hover:text-red-700 delete-file-btn" data-filename="${filename}" data-container="add">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                employeeFileContainer.appendChild(fileElement);
+            }
+
+            function renderEditFileContainer(documents) {
+                editEmployeeFileContainer.innerHTML = '';
+                if (documents.length === 0) {
+                    editEmployeeFileContainer.innerHTML = `<p class="text-gray-400">Nenhum documento anexado.</p>`;
+                } else {
+                    documents.forEach(doc => {
+                        const fileIcon = doc.endsWith('.pdf') ? 'fas fa-file-pdf text-red-500' :
+                                         doc.endsWith('.jpg') || doc.endsWith('.png') ? 'fas fa-image text-blue-500' :
+                                         'fas fa-file text-gray-500';
+                        const fileElement = document.createElement('div');
+                        fileElement.className = 'border rounded p-3 flex items-center';
+                        fileElement.innerHTML = `
+                            <i class="${fileIcon} text-xl mr-3"></i>
+                            <div>
+                                <p class="text-sm font-medium">${doc}</p>
+                            </div>
+                            <button class="ml-auto text-red-500 hover:text-red-700 delete-file-btn" data-filename="${doc}" data-container="edit">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                        editEmployeeFileContainer.appendChild(fileElement);
+                    });
+                    document.querySelectorAll('.delete-file-btn[data-container="edit"]').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const filename = e.currentTarget.dataset.filename;
+                            const employeeId = document.getElementById('editEmployeeId').value;
+                            const employee = employees.find(emp => emp.id === parseInt(employeeId));
+                            if (employee) {
+                                employee.documents = employee.documents.filter(doc => doc !== filename);
+                                renderEditFileContainer(employee.documents);
+                            }
+                        });
+                    });
+                }
+            }
 
             employeeForm.addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -1763,7 +1824,7 @@
                     gender: document.getElementById('employeeGender').value,
                     maritalStatus: document.getElementById('employeeMaritalStatus').value,
                     contractType: document.getElementById('employeeContractType').value,
-                    documents: [] // Adicionei documents aqui para novos funcionários
+                    documents: Array.from(employeeFileContainer.querySelectorAll('.delete-file-btn')).map(btn => btn.dataset.filename)
                 };
                 employees.push(newEmployee);
                 updateDashboardCounts();
@@ -1796,7 +1857,8 @@
                         birthDate: document.getElementById('editEmployeeBirthDate').value,
                         gender: document.getElementById('editEmployeeGender').value,
                         maritalStatus: document.getElementById('editEmployeeMaritalStatus').value,
-                        contractType: document.getElementById('editEmployeeContractType').value
+                        contractType: document.getElementById('editEmployeeContractType').value,
+                        documents: Array.from(editEmployeeFileContainer.querySelectorAll('.delete-file-btn')).map(btn => btn.dataset.filename)
                     };
                 }
                 updateDashboardCounts();
@@ -2185,13 +2247,13 @@
                             <div>
                                 <p class="text-sm font-medium">${doc}</p>
                             </div>
-                            <button class="ml-auto text-red-500 hover:text-red-700 delete-file-btn" data-filename="${doc}">
+                            <button type="button" class="ml-auto text-red-500 hover:text-red-700 delete-file-btn" data-filename="${doc}" data-container="edit">
                                 <i class="fas fa-times"></i>
                             </button>
                         `;
                         editEmployeeFileContainer.appendChild(fileElement);
                     });
-                    document.querySelectorAll('.delete-file-btn').forEach(btn => {
+                    document.querySelectorAll('.delete-file-btn[data-container="edit"]').forEach(btn => {
                         btn.addEventListener('click', (e) => {
                             const filename = e.currentTarget.dataset.filename;
                             const employeeId = document.getElementById('editEmployeeId').value;
