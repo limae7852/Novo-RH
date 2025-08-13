@@ -52,6 +52,7 @@
 </head>
 <body class="bg-gray-100">
     <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
         <div class="sidebar bg-blue-800 text-white w-64 flex flex-col fixed h-full">
             <div class="p-4 flex items-center border-b border-blue-700">
                 <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
@@ -117,7 +118,9 @@
             </div>
         </div>
 
+        <!-- Main Content -->
         <div class="main-content flex-1 overflow-auto ml-64">
+            <!-- Top Navigation -->
             <header class="bg-white shadow-sm">
                 <div class="px-4 py-3 flex justify-between items-center">
                     <h1 class="text-xl font-semibold text-gray-800" id="pageTitle">Dashboard</h1>
@@ -146,7 +149,9 @@
                 </div>
             </header>
 
+            <!-- Page Content -->
             <main class="p-4">
+                <!-- Dashboard Section -->
                 <section id="dashboardSection" class="section-content">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <div class="bg-white p-4 rounded-lg shadow">
@@ -252,12 +257,14 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200" id="recentHiresTable">
-                                    </tbody>
+                                    <!-- Recent hires will be inserted here -->
+                                </tbody>
                             </table>
                         </div>
                     </div>
                 </section>
 
+                <!-- Employees Section -->
                 <section id="employeesSection" class="section-content hidden">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-semibold">Gerenciamento de Funcionários</h2>
@@ -299,7 +306,8 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200" id="employeesTable">
-                                    </tbody>
+                                    <!-- Employees will be inserted here -->
+                                </tbody>
                             </table>
                         </div>
                         <div class="p-4 border-t flex items-center justify-between">
@@ -314,6 +322,7 @@
                     </div>
                 </section>
 
+                <!-- Departments Section -->
                 <section id="departmentsSection" class="section-content hidden">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-semibold">Gerenciamento de Departamentos</h2>
@@ -342,7 +351,8 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200" id="departmentsTable">
-                                    </tbody>
+                                    <!-- Departments will be inserted here -->
+                                </tbody>
                             </table>
                         </div>
                         <div class="p-4 border-t flex items-center justify-between">
@@ -357,6 +367,7 @@
                     </div>
                 </section>
 
+                <!-- Positions Section -->
                 <section id="positionsSection" class="section-content hidden">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-semibold">Gerenciamento de Cargos</h2>
@@ -388,7 +399,8 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200" id="positionsTable">
-                                    </tbody>
+                                    <!-- Positions will be inserted here -->
+                                </tbody>
                             </table>
                         </div>
                         <div class="p-4 border-t flex items-center justify-between">
@@ -403,6 +415,7 @@
                     </div>
                 </section>
 
+                <!-- Payroll Section -->
                 <section id="payrollSection" class="section-content hidden">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-semibold">Folha de Pagamento</h2>
@@ -460,7 +473,8 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200" id="payrollTable">
-                                    </tbody>
+                                    <!-- Payroll will be inserted here -->
+                                </tbody>
                             </table>
                         </div>
                         <div class="p-4 border-t flex items-center justify-between">
@@ -504,6 +518,7 @@
                     </div>
                 </section>
 
+                <!-- Settings Section -->
                 <section id="settingsSection" class="section-content hidden">
                     <h2 class="text-2xl font-semibold mb-6">Configurações do Sistema</h2>
                     
@@ -744,6 +759,7 @@
                     </div>
                 </section>
 
+                <!-- Reports Section -->
                 <section id="reportsSection" class="section-content hidden">
                     <h2 class="text-2xl font-semibold mb-6">Relatórios</h2>
                     
@@ -826,6 +842,8 @@
         </div>
     </div>
 
+    <!-- Modals -->
+    <!-- Add Employee Modal -->
     <div id="addEmployeeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-screen overflow-y-auto">
             <div class="p-6 border-b">
@@ -1016,6 +1034,7 @@
         </div>
     </div>
 
+    <!-- Edit Employee Modal -->
     <div id="editEmployeeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-screen overflow-y-auto">
             <div class="p-6 border-b">
@@ -1207,6 +1226,7 @@
         </div>
     </div>
 
+    <!-- Add Department Modal -->
     <div id="addDepartmentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
             <div class="p-6 border-b">
@@ -1241,6 +1261,7 @@
         </div>
     </div>
 
+    <!-- Add Position Modal -->
     <div id="addPositionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
             <div class="p-6 border-b">
@@ -1279,6 +1300,7 @@
         </div>
     </div>
 
+    <!-- View Employee Modal -->
     <div id="viewEmployeeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-screen overflow-y-auto">
             <div class="p-6 border-b flex justify-between items-center">
@@ -1338,6 +1360,7 @@
                             <div>
                                 <h5 class="font-medium text-gray-700 mb-2">Documentos</h5>
                                 <div class="space-y-2 text-sm" id="viewEmployeeDocuments">
+                                    <!-- Documents will be inserted here -->
                                     <p class="text-gray-400">Nenhum documento anexado.</p>
                                 </div>
                             </div>
@@ -2240,7 +2263,8 @@
                 document.querySelectorAll('.delete-employee').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         const id = parseInt(e.target.dataset.id);
-                        if (confirm('Tem certeza que deseja excluir este funcionário?')) {
+                        // A simple confirmation dialog.
+                        if (window.confirm('Tem certeza que deseja excluir este funcionário?')) {
                             employees = employees.filter(emp => emp.id !== id);
                             updateDashboardCounts();
                             renderTables();
